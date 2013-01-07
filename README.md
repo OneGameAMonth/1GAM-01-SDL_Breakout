@@ -3,6 +3,6 @@
 
 January entry WIP
 
-SDL
-SDL_image
-SDL_ttf
+SDL;
+SDL_image;
+SDL_ttf;
