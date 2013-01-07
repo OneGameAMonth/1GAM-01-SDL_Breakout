@@ -2,3 +2,7 @@
 ====================
 
 January entry WIP
+
+SDL
+SDL_image
+SDL_ttf
