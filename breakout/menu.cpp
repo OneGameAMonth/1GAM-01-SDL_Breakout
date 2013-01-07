@@ -1,0 +1,85 @@
+#include "menu.hpp"
+
+Menu::Menu(std::string n,TTF_Font* f,int ptsz,int pw,int ph,int pbpp){
+	SetName(n);
+	font = f;
+	ptsize = ptsz;
+	mx = 0; my = 0; mst = 0;
+	width = pw;
+	height = ph;
+	bpp = pbpp;
+	newGame = false;
+
+	draw_surf = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,bpp,0,0,0,0);
+
+	buttons.push_back(new Button("main_button_start",(width/2) - 64,10,128,64,"media/img/test_button.bmp"));
+	buttons.push_back(new Button("main_button_quit",(width/2) - 64,100,128,64,"media/img/test_button.bmp"));
+
+}
+
+Menu::~Menu(){
+	while(!buttons.empty()){
+		Button* b = buttons.back();
+		delete b;
+		buttons.pop_back();
+	}
+
+	if(draw_surf != NULL){
+		SDL_FreeSurface(draw_surf);
+	}
+}
+
+void Menu::Run(){
+	if(run){
+		std::vector<Button*>::iterator itr;
+
+		for(itr = buttons.begin(); itr!=buttons.end();itr++){
+			Button* b = (*itr);
+			b->Update(mx,my,mst);
+			if(b->GetName() == "main_button_quit"){
+				if(b->GetState() == BTT_PRESSED){
+					halt = true;
+				}
+			}else if(b->GetName() == "main_button_start"){
+				if(b->GetState() == BTT_PRESSED){
+					newGame = true;
+					mx = 0; my = 0; mst = 0;
+					break;
+				}
+			}
+		}
+	}
+}
+
+void Menu::Draw(SDL_Surface* screen){
+	std::vector<Button*>::iterator itr;
+
+	SDL_FillRect(draw_surf,NULL,SDL_MapRGB(draw_surf->format,255,255,255));
+
+	for(itr = buttons.begin(); itr!=buttons.end();itr++){
+		(*itr)->Blit(draw_surf);
+	}
+
+	Surface::Blit(draw_surf,0,0,width,height,screen,0,0);
+}
+
+void Menu::OnEvent(SDL_Event* e){
+	switch(e->type){
+	case SDL_MOUSEMOTION:
+		mx = e->motion.x;
+		my = e->motion.y;
+		break;
+	case SDL_MOUSEBUTTONDOWN:
+		mst = 1;
+		break;
+	case SDL_MOUSEBUTTONUP:
+		mst = 0;
+		break;
+	}
+}
+
+int Menu::Listen(){
+	if(halt){ halt = false;return -1; }
+	if(newGame){ newGame = false; return 2;}
+	return 0;
+}
