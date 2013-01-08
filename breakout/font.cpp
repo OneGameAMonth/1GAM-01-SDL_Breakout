@@ -16,6 +16,7 @@ void Font::Blit(SDL_Surface* dst,int x,int y,TTF_Font* font,SDL_Color col,const 
 	SDL_FreeSurface(msg);
 }
 
+//sorry, this is horrible code
 void Font::Blitf(SDL_Surface* dst,int x,int y,TTF_Font* font,int ptsize,SDL_Color col,const char* text, ...){
 	std::va_list nums;
 	std::deque<std::string> ftext;
