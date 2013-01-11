@@ -11,6 +11,9 @@ private:
 	int x,y,w,h;
 	int type;
 public:
+
+	enum btype{GREY,BLUE,GREEN,PURPLE,YELLOW,RED};
+
 	Block(int px = 0,int py = 0,int pw = 0,int ph = 0,int ptype = 0,int phealth = 0){
 		x = px;y = py;
 		w = pw;h = ph;
@@ -27,6 +30,7 @@ public:
 	int GetH() const{ return h; }
 
 	void SetHealth(int phealth){ health = phealth; }
+	void SetType(int ptype){ type = ptype % 6; }
 };
 
 #endif

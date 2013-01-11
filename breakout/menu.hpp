@@ -8,6 +8,7 @@
 
 #include"state.hpp"
 #include"gui_button.hpp"
+#include"gui_textbox.hpp"
 
 class Menu: public State{
 private:
@@ -16,8 +17,9 @@ private:
 	TTF_Font* font;
 	SDL_Surface* draw_surf;
 	int mx,my,mst;
-	std::vector<Button*> buttons;
+	std::vector<GUI_Button*> buttons;
 	bool newGame;
+	bool editor;
 public:
 	Menu(std::string n,TTF_Font* f,int ptsz,int w,int h,int bpp);
 	~Menu();

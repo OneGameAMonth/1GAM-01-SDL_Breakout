@@ -9,17 +9,19 @@ Menu::Menu(std::string n,TTF_Font* f,int ptsz,int pw,int ph,int pbpp){
 	height = ph;
 	bpp = pbpp;
 	newGame = false;
+	editor = false;
 
 	draw_surf = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,bpp,0,0,0,0);
 
-	buttons.push_back(new Button("main_button_start",(width/2) - 64,10,128,64,"media/img/test_button.bmp"));
-	buttons.push_back(new Button("main_button_quit",(width/2) - 64,100,128,64,"media/img/test_button.bmp"));
+	buttons.push_back(new GUI_Button("main_button_start",(width/2) - 64,10,128,64,"media/img/play_btn.bmp"));
+	buttons.push_back(new GUI_Button("main_button_editor",(width/2) - 64,100,128,64,"media/img/edit_btn.bmp"));
+	buttons.push_back(new GUI_Button("main_button_quit",(width/2) - 64,190,128,64,"media/img/quit_btn.bmp"));
 
 }
 
 Menu::~Menu(){
 	while(!buttons.empty()){
-		Button* b = buttons.back();
+		GUI_Button * b = buttons.back();
 		delete b;
 		buttons.pop_back();
 	}
@@ -31,10 +33,10 @@ Menu::~Menu(){
 
 void Menu::Run(){
 	if(run){
-		std::vector<Button*>::iterator itr;
+		std::vector<GUI_Button*>::iterator itr;
 
 		for(itr = buttons.begin(); itr!=buttons.end();itr++){
-			Button* b = (*itr);
+			GUI_Button* b = (*itr);
 			b->Update(mx,my,mst);
 			if(b->GetName() == "main_button_quit"){
 				if(b->GetState() == BTT_PRESSED){
@@ -46,15 +48,21 @@ void Menu::Run(){
 					mx = 0; my = 0; mst = 0;
 					break;
 				}
+			}else if(b->GetName() =="main_button_editor"){
+				if(b->GetState() == BTT_PRESSED){
+					editor = true;
+					mx = 0; my = 0; mst = 0;
+					break;
+				}
 			}
 		}
 	}
 }
 
 void Menu::Draw(SDL_Surface* screen){
-	std::vector<Button*>::iterator itr;
+	std::vector<GUI_Button*>::iterator itr;
 
-	SDL_FillRect(draw_surf,NULL,SDL_MapRGB(draw_surf->format,255,255,255));
+	SDL_FillRect(draw_surf,NULL,SDL_MapRGB(draw_surf->format,255,204,102));
 
 	for(itr = buttons.begin(); itr!=buttons.end();itr++){
 		(*itr)->Blit(draw_surf);
@@ -81,5 +89,6 @@ void Menu::OnEvent(SDL_Event* e){
 int Menu::Listen(){
 	if(halt){ halt = false;return -1; }
 	if(newGame){ newGame = false; return 2;}
+	if(editor){ editor = false; return 3;}
 	return 0;
 }

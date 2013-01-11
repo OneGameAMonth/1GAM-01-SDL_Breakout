@@ -8,7 +8,7 @@
 
 enum ButtonState{ BTT_NORMAL = 0, BTT_HOVER = 1, BTT_PRESSED = 2, BTT_INACTIVE = 3 };
 
-class Button{
+class GUI_Button{
 private:
 	int w,h;
 	int sx,sy;
@@ -18,8 +18,8 @@ private:
 	ButtonState s;
 	std::string name;
 public:
-	Button(std::string pname,int px,int py,int pw,int ph,char* img_path);
-	virtual ~Button();
+	GUI_Button(std::string pname,int px,int py,int pw,int ph,char* img_path);
+	virtual ~GUI_Button();
 
 	bool IsDraw() const{ return draw; }
 	void SetDraw(bool pdr){ draw = pdr; }

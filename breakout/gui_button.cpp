@@ -1,6 +1,6 @@
 #include"gui_button.hpp"
 
-Button::Button(std::string pname,int px,int py,int pw,int ph,char* img_path){
+GUI_Button::GUI_Button(std::string pname,int px,int py,int pw,int ph,char* img_path){
 	sx = px;
 	sy = py;
 	w = pw;
@@ -23,23 +23,23 @@ Button::Button(std::string pname,int px,int py,int pw,int ph,char* img_path){
 	img = Surface::Load(img_path);
 }
 
-Button::~Button(){
+GUI_Button::~GUI_Button(){
 	if(img != NULL){
 		SDL_FreeSurface(img);
 	}
 }
 
-void Button::Blit(SDL_Surface* dst){
+void GUI_Button::Blit(SDL_Surface* dst){
 	SDL_Rect rg = regions[s];
 
 	Surface::Blit(img,rg.x,rg.y,rg.w,rg.h,dst,sx,sy);
 }
 
-void Button::Update(int mx,int my,int mst){
+void GUI_Button::Update(int mx,int my,int mst){
 	if(s == BTT_INACTIVE){ return; }
 
 	if(mx >= sx && mx <= sx+w && my >= sy && my <= sy+h){
-		if(mst > 0){
+		if(mst == 1){
 			s = BTT_PRESSED;
 		}else{
 			s = BTT_HOVER;

@@ -12,18 +12,26 @@ GameField::GameField(std::string n,TTF_Font* f,int ptsz,int w,int h,int bpp){
 
 	font = f;
 	ptsize = ptsz;
+	level = 1;
+	score = 0;
 
 	draw_surf = SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,depth,0,0,0,0);
-	b_surf = SDL_CreateRGBSurface(SDL_SWSURFACE,B_W,B_H,depth,0,0,0,0);
-	p_surf = SDL_CreateRGBSurface(SDL_SWSURFACE,P_W,P_H,depth,0,0,0,0);
-	t_surf = SDL_CreateRGBSurface(SDL_SWSURFACE,32,16,depth,0,0,0,0);
+
+	dum_surf = SDL_CreateRGBSurface(SDL_SWSURFACE,B_W,B_H,depth,0,0,0,0);
+
+	b_surf = Surface::Load("media/img/block_sheet.bmp");
+
+	//p_surf = SDL_CreateRGBSurface(SDL_SWSURFACE,P_W,P_H,depth,0,0,0,0);
+	p_surf = Surface::Load("media/img/paddle_small.bmp");
+
 	ball_surf = SDL_CreateRGBSurface(SDL_SWSURFACE,BALL_W,BALL_H,depth,0,0,0,0);
-	quit_btn = new Button("game_field_quit",490,400,128,64,"media/img/test_button.bmp");
+	//ball_surf = Surface::Load("media/img/ballblue.bmp");
+
+	quit_btn = new GUI_Button("game_field_quit",490,400,128,64,"media/img/quit_btn.bmp");
 
 	p = new Pad(P_SX,P_SY,P_W,P_H);
 	p->padmove = true;
-	test_bb = new AABB(mx,my,32,16);
-	ball = new Ball(220,300,BALL_W,BALL_H);
+	ball = new Ball(230,300,BALL_W,BALL_H);
 
 	obx = ball->GetOX();
 	oby = ball->GetOY();
@@ -41,12 +49,13 @@ GameField::~GameField(){
 	if(b_surf != NULL){
 		SDL_FreeSurface(b_surf);
 	}
-	if(p_surf != NULL){
-		SDL_FreeSurface(p_surf);
+
+	if(dum_surf != NULL){
+		SDL_FreeSurface(dum_surf);
 	}
 
-	if(t_surf != NULL){
-		SDL_FreeSurface(t_surf);
+	if(p_surf != NULL){
+		SDL_FreeSurface(p_surf);
 	}
 
 	if(ball_surf != NULL){
@@ -57,27 +66,76 @@ GameField::~GameField(){
 		delete p;
 	}
 
-	if(test_bb != NULL){
-		delete test_bb;
-	}
 	if(ball != NULL){
 		delete ball;
 	}
 }
 
 void GameField::Init(){
+
+	ball->Set(230,300);
+
+	lives = 10;
+
+	for(int i = 0;i < B_TYPES;i++){
+		block_clips[i].x = 0;
+		block_clips[i].y = (i*B_H);
+		block_clips[i].w = B_W;
+		block_clips[i].h = B_H;
+	}
+
 	for(int i = 0; i < F_HEIGHT;i++){
 		for(int j = 0; j < F_WIDTH;j++){
-			grid[i][j] = Block(F_SX+j*B_W,F_SY+i*B_H,B_W,B_H,0,0);
+			grid[i][j] = Block(F_SX+j*B_W,F_SY+i*B_H,B_W,B_H,rand() % B_TYPES,0);
 		}
 	}
 
-	for(int i = 2; i < 8;i++){
-		for(int j = 2; j < 12;j++){
-			Block* dummy = &grid[i][j];
-			dummy->SetHealth(100);
+	paused = false;
+	if(level < 2){
+		char dst[4096];
+		sprintf(dst,"%d",level);
+		if( !LoadLevel("levels/"+std::string(dst)+".brk") ){
+			halt = true;
 		}
 	}
+}
+
+bool GameField::LoadLevel(std::string fn){
+	FILE* level = 0;
+	level = fopen(fn.c_str(),"rb");
+
+	if(level != 0){
+		for(int i = 0;i < F_HEIGHT;i++){
+			for(int j = 0; j < F_WIDTH;j++){
+				if(!feof(level)){
+					int pos = (F_WIDTH*i + j);
+					fseek(level,pos*sizeof(Block),SEEK_SET);
+					fread(&grid[i][j],sizeof(Block),1,level);
+				}
+			}
+		}
+
+		fclose(level);
+
+		return true;
+	}
+
+	return false;
+
+}
+
+bool GameField::CheckEmpty(){
+	bool ret = true;
+	for(int i = 0; i < F_HEIGHT;i++){
+		for(int j = 0 ; j < F_WIDTH;j++){
+			if(grid[i][j].GetHealth() > 0){
+				ret = false;
+				break;
+			}
+		}
+	}
+
+	return ret;
 }
 
 void GameField::Run(){
@@ -112,8 +170,28 @@ void GameField::Run(){
 		}
 
 		if(ball->GetY() + BALL_H > (F_SY + (F_HEIGHT*B_H))){
-			ball->Set(ball->GetX(),(F_SY + (F_HEIGHT*B_H)) - BALL_H);
+			//ball->Set(ball->GetX(),(F_SY + (F_HEIGHT*B_H)) - BALL_H);
 			ball->SetDir(1,-1);
+			ball->Set(230,350);
+			p->Set(P_SX,P_SY);
+			lives--;
+			if(lives <= 0){ halt = true; }
+		}
+
+
+		if(CheckEmpty()){
+			char dst[4096];
+			level++;
+
+			Init();
+
+			ball->SetDV(1,-1);
+			p->Set(P_SX,P_SY);
+
+			sprintf(dst,"%d",level);
+			if( !LoadLevel("levels/"+std::string(dst)+".brk") ){
+				halt = true;
+			}
 		}
 
 		//paused = true;
@@ -122,7 +200,7 @@ void GameField::Run(){
 
 			for(int i = 0;i < F_HEIGHT;i++){
 				for(int j = 0; j < F_WIDTH; j++){
-					ball->DoColBlock(&grid[i][j]);
+					ball->DoColBlock(&grid[i][j],&score);
 				}
 			}
 
@@ -139,37 +217,32 @@ void GameField::Run(){
 }
 
 void GameField::Draw(SDL_Surface* screen){
-	SDL_Color red = {255,0,0};
+	//actually not red
+	SDL_Color red = {0,0,0};
 
-	SDL_FillRect(draw_surf,NULL,SDL_MapRGB(draw_surf->format,0,0,0));
+	SDL_FillRect(draw_surf,NULL,SDL_MapRGB(draw_surf->format,255,204,102));
 
 	for(int i = 0; i < F_HEIGHT;i++){
 		for(int j = 0; j < F_WIDTH;j++){
 			Uint32 col;
 			if(grid[i][j].GetHealth() > 0){
-				switch(grid[i][j].GetType()){
-				case 0:
-					col = SDL_MapRGB(b_surf->format,255,0,0);
-				break;
-				case 1:
-					col = SDL_MapRGB(b_surf->format,0,255,0);
-				break;
-				}
+				Surface::Blit(b_surf,0,block_clips[grid[i][j].GetType()].y,B_W,B_H,draw_surf,F_SX+j*B_W,F_SY+i*B_H);
 			}else{
-				col = SDL_MapRGB(b_surf->format,255,255,255);
+				col = SDL_MapRGB(dum_surf->format,255,255,255);
+				SDL_FillRect(dum_surf,NULL,col);
+				Surface::Blit(dum_surf,0,0,B_W,B_H,draw_surf,F_SX+j*B_W,F_SY+i*B_H);
 			}
-			SDL_FillRect(b_surf,NULL,col);
-			Surface::Blit(b_surf,0,0,B_W,B_H,draw_surf,F_SX+j*B_W,F_SY+i*B_H);
 		}
 	}
 
-	SDL_FillRect(p_surf,NULL,SDL_MapRGB(p_surf->format,255,128,0));
+	//SDL_FillRect(p_surf,NULL,SDL_MapRGB(p_surf->format,255,128,0));
 	Surface::Blit(p_surf,0,0,P_W,P_H,draw_surf,p->GetX(),p->GetY());
 
-	SDL_FillRect(ball_surf,NULL,SDL_MapRGB(ball_surf->format,0,255,0));
+	//SDL_FillRect(ball_surf,NULL,SDL_MapRGB(ball_surf->format,18,140,200));
 	Surface::Blit(ball_surf,0,0,BALL_W,BALL_H,draw_surf,ball->GetX(),ball->GetY());
 
-	Font::Blitf(draw_surf,10,10,font,ptsize,red," Testing collisions, no death ");
+	Font::Blitf(draw_surf,10,10,font,ptsize,red,"Lives: %d \n Score: %d ",lives,score);
+	Font::Blitf(draw_surf,100,10,font,ptsize,red,"Level: %d ",level);
 
 	quit_btn->Blit(draw_surf);
 

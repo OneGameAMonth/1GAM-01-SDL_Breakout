@@ -1,6 +1,7 @@
 #include "app.hpp"
 #include "menu.hpp"
 #include "gamefield.hpp"
+#include "editor.hpp"
 
 Application::Application(int argc,char* argv[]){
 	screen = NULL;
@@ -140,8 +141,17 @@ int Application::Run(){
 				case 2:
 					PushState(new GameField("game_field",arial,14,width,height,bpp));
 					break;
+				case 3:
+					PushState(new Editor("game_editor",arial,14,width,height,bpp));
+					break;
 				}
 			}else if(gamestate.back()->GetName() == "game_field"){
+				switch(gamestate.back()->Listen()){
+				case -1:
+					PopState();
+					break;
+				}
+			}else if(gamestate.back()->GetName() == "game_editor"){
 				switch(gamestate.back()->Listen()){
 				case -1:
 					PopState();

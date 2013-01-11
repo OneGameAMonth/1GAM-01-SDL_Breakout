@@ -36,9 +36,10 @@ public:
 	void Set(int px,int py){ x = px; y = py; }
 	void SetO(){ ox = x; oy = y; }
 	void SetDir(int mpdx,int mpdy){ if(!dcd){ dx *= mpdx; dy *= mpdy; } }
+	void SetDV(int pdx,int pdy){ dx = pdx; dy = pdy; }
 
 	void DoColPad(Pad* p);
-	void DoColBlock(Block* blk);
+	void DoColBlock(Block* blk,int* score);
 };
 
 #endif

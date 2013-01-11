@@ -18,11 +18,13 @@ void Ball::DoColPad(Pad* p){
 		break;
 	case AABB::TOP_COL:
 	case AABB::BOTTOM_COL:
+
 		ball->Set(obx,oby);
 		ball->SetDir(1,-1);
 		break;
 	case AABB::LEFT_COL:
 	case AABB::RIGHT_COL:
+
 		ball->Set(obx,oby);
 		ball->SetDir(-1,1);
 		break;
@@ -33,7 +35,8 @@ void Ball::DoColPad(Pad* p){
 				ball->Set(ball->GetX() - bd.left,ball->GetY());
 				ball->SetDir(-1,1);
 				//
-				p->Move(bd.left,0);
+				//p->Move(bd.left,0);
+				p->Set(p->GetX() + bd.left,p->GetY());
 			}else{
 				ball->Set(ball->GetX(),ball->GetY() - bd.top);
 				ball->SetDir(1,-1);
@@ -43,7 +46,8 @@ void Ball::DoColPad(Pad* p){
 				ball->Set(ball->GetX() - bd.left,ball->GetY());
 				ball->SetDir(-1,1);
 				//
-				p->Move(bd.left,0);
+				//p->Move(bd.left,0);
+				p->Set(p->GetX() + bd.left,p->GetY());
 			}else{
 				ball->Set(ball->GetX(),ball->GetY() + bd.bottom);
 				ball->SetDir(1,-1);
@@ -53,7 +57,8 @@ void Ball::DoColPad(Pad* p){
 				ball->Set(ball->GetX() + bd.right,ball->GetY());
 				ball->SetDir(-1,1);
 				//
-				p->Move(-bd.right,0);
+				//p->Move(-bd.right,0);
+				p->Set(p->GetX() - bd.left,p->GetY());
 			}else{
 				ball->Set(ball->GetX(),ball->GetY() + bd.bottom);
 				ball->SetDir(1,-1);
@@ -64,7 +69,8 @@ void Ball::DoColPad(Pad* p){
 				ball->Set(ball->GetX() + bd.right,ball->GetY());
 				ball->SetDir(-1,1);
 				//
-				p->Move(-bd.right,0);
+				//p->Move(-bd.right,0);
+				p->Set(p->GetX() - bd.left,p->GetY());
 			}else{
 				ball->Set(ball->GetX(),ball->GetY() - bd.top);
 				ball->SetDir(1,-1);
@@ -75,7 +81,7 @@ void Ball::DoColPad(Pad* p){
 	}
 }
 
-void Ball::DoColBlock(Block* blk){
+void Ball::DoColBlock(Block* blk,int* score){
 	AABB* blk_dummy = new AABB(blk->GetX(),blk->GetY(),blk->GetW(),blk->GetH());
 
 	AABB::coltype bt = AABB::IsCol(bbox,blk_dummy);
@@ -90,12 +96,14 @@ void Ball::DoColBlock(Block* blk){
 		case AABB::NO_COL:
 		case AABB::COL_INSIDE:
 			break;
+
 		case AABB::TOP_COL:
 		case AABB::BOTTOM_COL:
 			ball->Set(obx,oby);
 			ball->SetDir(1,-1);
 			blk->SetHealth(0);
 			ball->dcd = true;
+			(*score)+=10*(blk->GetType()+1);
 			break;
 		case AABB::LEFT_COL:
 		case AABB::RIGHT_COL:
@@ -103,6 +111,7 @@ void Ball::DoColBlock(Block* blk){
 			ball->SetDir(-1,1);
 			blk->SetHealth(0);
 			ball->dcd = true;
+			(*score)+=10*(blk->GetType()+1);
 			break;
 		case AABB::COL_INTERSECT:
 			if(bd.bottom == 0 && bd.right == 0){
@@ -146,6 +155,7 @@ void Ball::DoColBlock(Block* blk){
 
 			ball->dcd = true;
 			blk->SetHealth(0);
+			(*score)+=10*(blk->GetType()+1);
 			break;
 		}
 	}

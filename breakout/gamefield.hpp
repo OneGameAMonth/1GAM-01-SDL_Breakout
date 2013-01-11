@@ -3,6 +3,7 @@
 
 #include<SDL_ttf.h>
 #include<string>
+#include<cstdlib>
 
 #include"state.hpp"
 #include"gui_button.hpp"
@@ -16,6 +17,7 @@
 #define F_HEIGHT 24
 #define B_W 32
 #define B_H 16
+#define B_TYPES 6
 #define P_W 64
 #define P_H 16
 #define P_SX 200
@@ -29,11 +31,13 @@ private:
 	TTF_Font* font;
 	SDL_Surface* draw_surf;
 
-	Button* quit_btn;
+	GUI_Button* quit_btn;
 	int mx,my,mst;
 
 	Block grid[F_HEIGHT][F_WIDTH];
-	SDL_Surface* b_surf;
+	SDL_Surface* b_surf,*dum_surf;
+	SDL_Rect block_clips[B_TYPES];
+	int lives,level,score;
 
 	Pad* p;
 	bool padmove;
@@ -42,13 +46,13 @@ private:
 	Ball* ball;
 	int obx,oby;
 	SDL_Surface* ball_surf;
-
-	AABB* test_bb;
-	SDL_Surface* t_surf;
 public:
 	GameField(std::string n,TTF_Font* f,int ptsz,int w,int h,int bpp);
 	~GameField();
 	void Init();
+	bool LoadLevel(std::string fn);
+	bool CheckEmpty();
+
 	void Run();
 	void Draw(SDL_Surface* screen);
 	void OnEvent(SDL_Event* e);

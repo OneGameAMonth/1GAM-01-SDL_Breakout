@@ -17,7 +17,7 @@ public:
 		delete colbox;
 	}
 
-	void Move(int dx,int dy){ x+=dx; y+=dy; }
+	void Move(int dx,int dy){ if(padmove){ x+=dx; y+=dy; } }
 	void Set(int px,int py){ x = px; y = py; }
 	int GetX() const { return x; }
 	int GetY() const { return y; }

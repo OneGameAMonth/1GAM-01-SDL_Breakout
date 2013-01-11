@@ -1,6 +1,7 @@
 #ifndef _SURF_HPP_
 #define _SURF_HPP_
 
+#include<iostream>
 #include<SDL.h>
 #include<SDL_image.h>
 #include<SDL_ttf.h>

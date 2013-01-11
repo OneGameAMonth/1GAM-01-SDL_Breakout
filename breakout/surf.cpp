@@ -14,6 +14,8 @@ SDL_Surface* Surface::Load(char* filename){
 			Uint32 ck = SDL_MapRGB(optimized->format,0xFF,0xFF,0xFF);
 			SDL_SetColorKey(optimized,SDL_SRCCOLORKEY,ck);
 		}
+	}else{
+		std::cout<<IMG_GetError()<<std::endl;
 	}
 	
 	return optimized;
